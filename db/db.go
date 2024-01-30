@@ -36,10 +36,26 @@ func CreateDB(db *sql.DB) error {
 			}
 		} else {
 			slog.Error("Error creating emails table: %s", err)
-
+			
 			return err
 		}
 	}
 
 	return nil
+}
+
+func getEmail(row *sql.Row) (*Email, error) {
+	email := &Email{}
+	err := row.Scan(&email.ID, &email.Email, &email.ConfirmedAt, &email.OptOut)
+	if err != nil {
+		slog.Error("Error scanning email: %s", err)
+
+		return nil, err
+	}
+
+	// convert time from unix timestamp to time.Time
+	t := time.Unix(email.ConfirmedAt.Unix(), 0)
+	email.ConfirmedAt = &t
+
+	return email, nil
 }
